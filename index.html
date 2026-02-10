@@ -12,8 +12,8 @@
             --r6-color: #ff4400; 
             --r5-color: #ffcc00; 
             --r4-color: #00ccff; 
-            --text-red: #ff3333; /* 核心红色 */
-            --text-dim-red: #cc5555; /* 歪了的红色 */
+            --text-red: #ff3333; 
+            --text-dim-red: #cc5555;
         }
 
         * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -114,29 +114,33 @@
         .btn-yellow { background: var(--accent-yellow); color: #000; clip-path: polygon(0 0, 100% 0, 100% 50px, calc(100% - 10px) 100%, 0 100%); min-width: 150px; }
         .btn .sub { font-size: 0.7rem; opacity: 0.7; }
 
-        /* === 抽卡结果弹窗 === */
+        /* === 抽卡结果弹窗 (一页全显版) === */
         .overlay-layer {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100;
             display: none; 
             flex-direction: column; 
-            overflow-y: auto; 
-            padding: 20px 0;
+            justify-content: center; /* 垂直居中 */
+            align-items: center;
+            overflow: hidden; /* 禁止页面滚动 */
         }
         .overlay-layer.active { display: flex; animation: fadeIn 0.3s; }
         
+        /* 电脑端默认：5列 x 2行 */
         .result-grid { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
             gap: 20px; 
-            max-width: 1200px; width: 90%; margin: auto;
+            max-width: 1200px; width: 90%; 
             perspective: 1000px; 
+            margin-bottom: 20px;
         }
 
         .card-scene {
-            aspect-ratio: 3/4.5;
+            aspect-ratio: 3/4.5; /* 电脑端保持固定比例 */
             position: relative;
             opacity: 0;
             animation: cardEnter 0.5s forwards;
+            width: 100%;
         }
 
         .card-obj {
@@ -144,13 +148,13 @@
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .card-obj.flipped { transform: rotateY(180deg); }
 
         .face {
             position: absolute; inset: 0; backface-visibility: hidden;
-            border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;
+            border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;
         }
 
         .face.back {
@@ -168,46 +172,66 @@
 
         .card-info { 
             margin-top: auto; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6));
-            padding: 8px; text-align: center; position: relative; z-index: 2;
+            padding: 6px; text-align: center; position: relative; z-index: 2;
         }
-        .card-name { font-size: 0.9rem; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000;}
-        .card-star { font-size: 1.2rem; display: block; margin-bottom: 2px; line-height: 1;}
+        .card-name { font-size: 0.9rem; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-star { font-size: 1rem; display: block; margin-bottom: 2px; line-height: 1;}
         .r6 .card-star { color: var(--r6-color); } .r5 .card-star { color: var(--r5-color); } .r4 .card-star { color: var(--r4-color); }
 
         .tag-up { 
             position: absolute; top:0; right:0; background: #ff3333; color:white; 
-            font-size:0.7rem; padding: 4px 8px; font-weight:bold; 
+            font-size:0.7rem; padding: 4px 6px; font-weight:bold; 
             border-bottom-left-radius: 8px; box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
         }
 
-        /* === 手机端适配 === */
+        /* === 手机端适配 (一页全览核心) === */
         @media (max-width: 768px) {
             .left-sidebar { top: 40%; transform: translateY(-40%); }
             .right-panel { bottom: 20px; right: 20px; }
             .btn { height: 45px; font-size: 0.9rem; min-width: 100px; }
             .btn-yellow { min-width: 130px; }
             
-            .overlay-layer { justify-content: flex-start; padding-top: 60px; padding-bottom: 80px; }
-            .result-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; width: 92%; }
-            .card-name { font-size: 0.85rem; }
+            /* 弹窗容器 */
+            .overlay-layer { padding: 10px; }
+
+            /* 核心：手机端网格调整 */
+            .result-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2列 */
+                grid-template-rows: repeat(5, 1fr);    /* 5行 */
+                height: 75vh;                          /* 强制高度为屏幕的75% */
+                width: 95%;                            /* 宽度占满 */
+                gap: 8px;                              /* 减小间距 */
+                margin-bottom: 10px;
+            }
+
+            .card-scene {
+                aspect-ratio: unset; /* 取消固定比例，由 Grid 自动拉伸 */
+                height: 100%;        /* 填满格子 */
+                width: 100%;
+            }
+
+            .card-info { padding: 4px; }
+            .card-name { font-size: 0.8rem; } /* 缩小字体 */
+            .card-star { font-size: 0.8rem; margin-bottom: 0; }
             
             #close-hint {
-                position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-                background: #333; color: #fff; z-index: 101; width: max-content;
+                position: relative; /* 不再固定底部，而是跟随网格 */
+                margin-top: 10px;
+                font-size: 0.8rem;
+                padding: 6px 20px;
             }
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes cardEnter { 
-            from { transform: translateY(50px) scale(0.9); opacity: 0; } 
+            from { transform: translateY(30px) scale(0.9); opacity: 0; } 
             to { transform: translateY(0) scale(1); opacity: 1; } 
         }
 
-        /* === 历史记录面板 (STYLE V2) === */
+        /* === 历史记录面板 === */
         #history-panel {
             position: fixed; left: 0; top: 0; bottom: 0; width: 420px; max-width: 85vw;
-            background: #0d0d0d; /* 纯黑背景 */
-            border-right: 1px solid #222; z-index: 150;
+            background: #0d0d0d; border-right: 1px solid #222; z-index: 150;
             transform: translateX(-100%); transition: transform 0.3s ease;
             display: flex; flex-direction: column; box-shadow: 10px 0 40px rgba(0,0,0,0.9);
         }
@@ -219,7 +243,6 @@
         }
         .hist-list { flex: 1; overflow-y: auto; padding: 10px 0; }
 
-        /* 新版 Item 样式 */
         .hist-item { 
             padding: 20px 30px; 
             border-bottom: 1px solid #1a1a1a; 
@@ -227,38 +250,18 @@
         }
 
         .hist-info { display: flex; flex-direction: column; }
-        
-        /* 名字大字体 */
-        .hist-name { 
-            font-size: 1.6rem; font-weight: bold; letter-spacing: 1px;
-        }
+        .hist-name { font-size: 1.6rem; font-weight: bold; letter-spacing: 1px;}
         .name-up { color: var(--text-red); text-shadow: 0 0 10px rgba(255, 51, 51, 0.3); }
         .name-lost { color: var(--text-dim-red); opacity: 0.8; }
-
-        /* 辅助信息小字 */
         .hist-meta { font-size: 0.75rem; color: #555; margin-top: 4px; font-weight: normal; }
 
-        /* UP 标签 - 空心红框 */
         .tag-box-up { 
-            border: 2px solid var(--text-red); 
-            color: var(--text-red);
-            border-radius: 8px;
-            padding: 2px 8px;
-            font-size: 1rem;
-            font-weight: 900;
-            line-height: 1.1;
+            border: 2px solid var(--text-red); color: var(--text-red);
+            border-radius: 8px; padding: 2px 8px; font-size: 1rem; font-weight: 900; line-height: 1.1;
         }
-
-        /* 歪 标签 - 灰色斜体 */
         .tag-text-lost {
-            color: #666;
-            font-size: 1.1rem;
-            font-style: italic;
-            font-weight: bold;
-            padding-right: 5px;
-            font-family: serif; /* 增加一点衬线感，更有味道 */
+            color: #666; font-size: 1.1rem; font-style: italic; font-weight: bold; padding-right: 5px; font-family: serif;
         }
-
         .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
     </style>
 </head>
@@ -307,7 +310,7 @@
     <div class="overlay-layer" id="result-layer" onclick="closeResults()">
         <div class="result-grid" id="result-grid" onclick="event.stopPropagation()">
             </div>
-        <div id="close-hint" style="margin-top:auto; margin-bottom: 20px; align-self:center; color:#888; border:1px solid #444; padding:8px 24px; border-radius:30px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">
+        <div id="close-hint" style="color:#888; border:1px solid #444; padding:8px 24px; border-radius:30px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">
             点击空白处关闭
         </div>
     </div>
@@ -417,13 +420,10 @@
         if (historyLogs.length === 0) { list.innerHTML = `<div style="padding:40px; color:#333; text-align:center;">// NO DATA //</div>`; return; }
         let html = '';
         historyLogs.forEach(log => {
-            // 样式逻辑：UP用红框，歪用文字
             let tagHTML = log.isUp 
                 ? `<div class="tag-box-up">UP</div>` 
                 : `<div class="tag-text-lost">歪</div>`;
-            
             let nameClass = log.isUp ? 'name-up' : 'name-lost';
-
             html += `
                 <div class="hist-item">
                     <div class="hist-info">
@@ -442,12 +442,12 @@
         const overlay = document.getElementById('result-layer');
         const grid = document.getElementById('result-grid');
         grid.innerHTML = ''; 
-        overlay.scrollTop = 0;
-
+        
+        // 渲染卡片
         list.forEach((res, idx) => {
             const scene = document.createElement('div');
             scene.className = `card-scene r${res.rank}`;
-            scene.style.animationDelay = `${idx * 0.1}s`;
+            scene.style.animationDelay = `${idx * 0.05}s`; // 加快动画速度
             let bgStyle = CHAR_IMAGES[res.name] ? `background-image: url('${CHAR_IMAGES[res.name]}')` : '';
             let upTag = res.isUp ? '<div class="tag-up">UP</div>' : '';
 
@@ -463,7 +463,7 @@
                     </div>
                 </div>`;
             grid.appendChild(scene);
-            setTimeout(() => { document.getElementById(`card-${idx}`)?.classList.add('flipped'); }, 600 + (idx * 150)); 
+            setTimeout(() => { document.getElementById(`card-${idx}`)?.classList.add('flipped'); }, 400 + (idx * 100)); 
         });
         overlay.classList.add('active');
     }
