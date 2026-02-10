@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>终末地 | 寻访模拟系统</title>
     <style>
         :root {
@@ -12,13 +12,14 @@
             --r6-color: #ff4400; 
             --r5-color: #ffcc00; 
             --r4-color: #00ccff; 
-            --text-red: #ff4d4d; /*稍微调柔和一点的红*/
+            --text-red: #ff3333; /* 核心红色 */
+            --text-dim-red: #cc5555; /* 歪了的红色 */
         }
 
-        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
+        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; /* 使用圆润的无衬线字体 */
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             background-color: #000;
             color: var(--ui-white);
             height: 100vh; width: 100vw;
@@ -27,15 +28,14 @@
             position: relative;
         }
 
-        /* === 背景立绘层 (改回全屏铺满) === */
+        /* === 背景层 === */
         #bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; /* 回归 Cover 模式 */
+            background-size: cover;
             background-repeat: no-repeat;
             background-position: center center; 
             transition: background-image 0.4s ease; z-index: 0;
         }
-
         #bg-layer::after {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.9) 100%);
@@ -43,87 +43,93 @@
 
         /* === UI 顶栏 === */
         .top-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 70px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             display: flex; justify-content: flex-end; align-items: center;
-            padding: 0 40px; z-index: 20;
+            padding: 0 20px; z-index: 20;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
         .resource-tag {
-            background: rgba(0,0,0,0.6); padding: 8px 20px; border-radius: 30px; /* 圆角背景 */
-            font-size: 0.95rem; display: flex; align-items: center; gap: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.6); padding: 6px 16px; border-radius: 30px;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
         }
-        .resource-icon { width: 14px; height: 14px; background: #ff4444; transform: rotate(45deg); display: inline-block; }
+        .resource-icon { width: 12px; height: 12px; background: #ff4444; transform: rotate(45deg); display: inline-block; }
 
         /* === 左侧卡池选择 === */
         .left-sidebar {
             position: absolute; top: 50%; left: 0; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; padding-left: 20px; z-index: 10;
+            display: flex; flex-direction: column; gap: 10px; padding-left: 0; z-index: 10;
         }
         .pool-tab {
-            width: 140px; height: 70px; background: rgba(0,0,0,0.5);
+            width: 120px; height: 60px; background: rgba(0,0,0,0.6);
             border-left: 4px solid transparent; color: #aaa;
-            cursor: pointer; display: flex; flex-direction: column; justify-content: center; padding-left: 15px;
-            transition: 0.2s; clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+            cursor: pointer; display: flex; flex-direction: column; justify-content: center; 
+            padding-left: 15px; transition: 0.2s; 
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+            font-size: 0.9rem;
         }
         .pool-tab.active {
             background: var(--ui-white); color: var(--ui-black);
-            border-left: 4px solid var(--accent-yellow); width: 160px; font-weight: bold;
+            border-left: 4px solid var(--accent-yellow); width: 140px; font-weight: bold;
         }
 
-        /* === 左下角：历史记录按钮 === */
+        /* === 历史记录按钮 === */
         .history-btn {
-            position: absolute; bottom: 40px; left: 40px; z-index: 20;
+            position: absolute; bottom: 30px; left: 30px; z-index: 20;
             background: rgba(30,30,30,0.8); border: 1px solid #555;
-            color: #ddd; padding: 10px 24px; cursor: pointer; border-radius: 4px;
-            font-size: 0.9rem; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
-            transition: 0.3s;
+            color: #ddd; padding: 10px 20px; cursor: pointer; border-radius: 4px;
+            font-size: 0.9rem; transition: 0.3s;
         }
-        .history-btn:hover { background: #333; border-color: #fff; color: #fff; }
 
         /* === 右侧操作区 === */
         .right-panel {
-            position: absolute; bottom: 40px; right: 40px;
+            position: absolute; bottom: 30px; right: 30px;
             text-align: right; z-index: 10;
             display: flex; flex-direction: column; align-items: flex-end;
         }
-        .banner-info h1 { font-size: 3rem; margin: 0; font-style: italic; line-height: 1; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .banner-info h1 { 
+            font-size: 2.5rem; margin: 0; font-style: italic; 
+            text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+        }
         .banner-info .sub-text {
-            color: var(--accent-yellow); font-size: 1rem; font-weight: bold;
+            color: var(--accent-yellow); font-size: 0.9rem; font-weight: bold;
             background: rgba(0,0,0,0.8); display: inline-block; padding: 2px 8px; margin-top: 5px;
         }
         .pity-counter {
-            background: rgba(0,0,0,0.7); padding: 12px 20px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.7); padding: 10px 15px; margin-bottom: 15px;
             border-left: 3px solid var(--accent-yellow); text-align: left;
-            font-size: 0.85rem; color: #ddd; width: 280px;
-            backdrop-filter: blur(4px);
+            font-size: 0.8rem; color: #ddd; width: 240px; backdrop-filter: blur(4px);
         }
         .pity-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .pity-val { color: var(--accent-yellow); font-weight: bold; }
         
-        .action-btns { display: flex; gap: 10px; }
+        .action-btns { display: flex; gap: 8px; }
         .btn {
-            height: 60px; min-width: 140px; border: none; cursor: pointer;
-            font-weight: bold; font-size: 1.1rem;
+            height: 55px; min-width: 120px; border: none; cursor: pointer;
+            font-weight: bold; font-size: 1rem;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: transform 0.1s;
         }
         .btn:active { transform: scale(0.96); }
         .btn-white { background: #e0e0e0; color: #000; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); }
-        .btn-yellow { background: var(--accent-yellow); color: #000; clip-path: polygon(0 0, 100% 0, 100% 50px, calc(100% - 10px) 100%, 0 100%); min-width: 180px; }
-        .btn .sub { font-size: 0.7rem; font-weight: normal; opacity: 0.7; margin-top: -2px; }
+        .btn-yellow { background: var(--accent-yellow); color: #000; clip-path: polygon(0 0, 100% 0, 100% 50px, calc(100% - 10px) 100%, 0 100%); min-width: 150px; }
+        .btn .sub { font-size: 0.7rem; opacity: 0.7; }
 
         /* === 抽卡结果弹窗 === */
         .overlay-layer {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100;
-            display: none; justify-content: center; align-items: center; flex-direction: column;
+            display: none; 
+            flex-direction: column; 
+            overflow-y: auto; 
+            padding: 20px 0;
         }
         .overlay-layer.active { display: flex; animation: fadeIn 0.3s; }
         
         .result-grid { 
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; 
-            max-width: 1200px; width: 90%; perspective: 1000px; 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 20px; 
+            max-width: 1200px; width: 90%; margin: auto;
+            perspective: 1000px; 
         }
 
         .card-scene {
@@ -143,58 +149,52 @@
         .card-obj.flipped { transform: rotateY(180deg); }
 
         .face {
-            position: absolute; inset: 0;
-            backface-visibility: hidden;
-            border-radius: 8px; overflow: hidden; /* 卡片圆角 */
-            display: flex; flex-direction: column;
+            position: absolute; inset: 0; backface-visibility: hidden;
+            border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* 卡背 */
         .face.back {
             background: #151515; border: 1px solid #333;
             justify-content: center; align-items: center;
-            background-image: 
-                linear-gradient(45deg, transparent 45%, #333 49%, #333 51%, transparent 55%),
-                linear-gradient(-45deg, transparent 45%, #333 49%, #333 51%, transparent 55%);
+            background-image: linear-gradient(45deg, transparent 45%, #333 49%, #333 51%, transparent 55%), linear-gradient(-45deg, transparent 45%, #333 49%, #333 51%, transparent 55%);
             background-size: 30px 30px;
         }
-        .face.back::after {
-            content: 'ENDFIELD'; color: #444; font-weight: 900; 
-            font-size: 1.2rem; letter-spacing: 2px; transform: rotate(-45deg);
-        }
-        /* 卡背光效 */
+        .face.back::after { content: 'ENDFIELD'; color: #444; font-weight: 900; font-size: 1.2rem; transform: rotate(-45deg); }
+        
         .card-scene.r6 .face.back { border: 2px solid var(--r6-color); box-shadow: 0 0 15px rgba(255, 68, 0, 0.2); }
-        .card-scene.r5 .face.back { border: 2px solid var(--r5-color); }
-
-        /* 卡面 */
-        .face.front {
-            background: #222; transform: rotateY(180deg);
-            background-size: cover; background-position: center; border: 1px solid #444;
-        }
-        .card-scene.r6 .face.front { 
-            box-shadow: 0 0 25px rgba(255, 68, 0, 0.5); border-bottom: 4px solid var(--r6-color);
-        }
-        .card-scene.r5 .face.front { 
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.3); border-bottom: 4px solid var(--r5-color);
-        }
-        .card-scene.r4 .face.front { border-bottom: 4px solid var(--r4-color); }
+        .card-scene.r6 .face.front { box-shadow: 0 0 25px rgba(255, 68, 0, 0.5); border-bottom: 4px solid var(--r6-color); }
+        
+        .face.front { background: #222; transform: rotateY(180deg); background-size: cover; background-position: center; border: 1px solid #444; }
 
         .card-info { 
-            margin-top: auto; 
-            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6));
-            padding: 10px; text-align: center; position: relative; z-index: 2;
+            margin-top: auto; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6));
+            padding: 8px; text-align: center; position: relative; z-index: 2;
         }
-        .card-name { font-size: 0.9rem; font-weight: bold; color: #fff; }
+        .card-name { font-size: 0.9rem; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000;}
         .card-star { font-size: 1.2rem; display: block; margin-bottom: 2px; line-height: 1;}
-        .r6 .card-star { color: var(--r6-color); }
-        .r5 .card-star { color: var(--r5-color); }
-        .r4 .card-star { color: var(--r4-color); }
+        .r6 .card-star { color: var(--r6-color); } .r5 .card-star { color: var(--r5-color); } .r4 .card-star { color: var(--r4-color); }
 
         .tag-up { 
             position: absolute; top:0; right:0; background: #ff3333; color:white; 
             font-size:0.7rem; padding: 4px 8px; font-weight:bold; 
-            border-bottom-left-radius: 8px; /* 卡面UP标签圆角 */
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
+            border-bottom-left-radius: 8px; box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* === 手机端适配 === */
+        @media (max-width: 768px) {
+            .left-sidebar { top: 40%; transform: translateY(-40%); }
+            .right-panel { bottom: 20px; right: 20px; }
+            .btn { height: 45px; font-size: 0.9rem; min-width: 100px; }
+            .btn-yellow { min-width: 130px; }
+            
+            .overlay-layer { justify-content: flex-start; padding-top: 60px; padding-bottom: 80px; }
+            .result-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; width: 92%; }
+            .card-name { font-size: 0.85rem; }
+            
+            #close-hint {
+                position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+                background: #333; color: #fff; z-index: 101; width: max-content;
+            }
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -203,59 +203,63 @@
             to { transform: translateY(0) scale(1); opacity: 1; } 
         }
 
-        /* === 历史记录面板 (字体优化版) === */
+        /* === 历史记录面板 (STYLE V2) === */
         #history-panel {
-            position: fixed; left: 0; top: 0; bottom: 0; width: 420px;
-            background: rgba(18, 18, 22, 0.98); /* 背景稍微调亮一点点，不那么死黑 */
-            border-right: 1px solid #333; z-index: 150;
+            position: fixed; left: 0; top: 0; bottom: 0; width: 420px; max-width: 85vw;
+            background: #0d0d0d; /* 纯黑背景 */
+            border-right: 1px solid #222; z-index: 150;
             transform: translateX(-100%); transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-            box-shadow: 10px 0 40px rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; box-shadow: 10px 0 40px rgba(0,0,0,0.9);
         }
         #history-panel.open { transform: translateX(0); }
+        
         .hist-header { 
-            padding: 25px; border-bottom: 1px solid #2a2a2a; 
+            padding: 30px; border-bottom: 1px solid #222; 
             display: flex; justify-content: space-between; align-items: center; 
-            background: #1e1e1e; 
         }
-        .hist-list { flex: 1; overflow-y: auto; padding: 0; }
-        
-        /* 这里的字体去掉了 Consolas，改用标准字体 */
-        .hist-item { 
-            padding: 18px 25px; 
-            border-bottom: 1px solid #2a2a2a; 
-            display: flex; flex-direction: column; gap: 8px; 
-            font-size: 0.95rem;
-            transition: background 0.2s;
-        }
-        .hist-item:hover { background: rgba(255,255,255,0.03); }
-        
-        .hist-row-1 { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.05rem; }
-        .hist-row-2 { display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; }
-        
-        /* 标签改为圆角胶囊样式，更柔和 */
-        .tag-up-badge { 
-            color: var(--text-red); 
-            background: rgba(255, 77, 77, 0.15); 
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            padding: 2px 8px; font-size: 0.75rem; 
-            border-radius: 12px; /* 圆角 */
-            font-weight: bold;
-        }
-        .tag-lost-badge { 
-            color: #aaa; 
-            border: 1px solid #555; 
-            padding: 2px 8px; font-size: 0.75rem; 
-            border-radius: 12px; /* 圆角 */
-            opacity: 0.8;
-        }
-        /* 歪了的时候名字颜色 */
-        .name-lost { color: #ccc; }
-        /* UP的时候名字颜色 */
-        .name-up { color: var(--text-red); }
+        .hist-list { flex: 1; overflow-y: auto; padding: 10px 0; }
 
-        .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; opacity: 0.7;}
-        .close-btn:hover { opacity: 1;}
+        /* 新版 Item 样式 */
+        .hist-item { 
+            padding: 20px 30px; 
+            border-bottom: 1px solid #1a1a1a; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .hist-info { display: flex; flex-direction: column; }
+        
+        /* 名字大字体 */
+        .hist-name { 
+            font-size: 1.6rem; font-weight: bold; letter-spacing: 1px;
+        }
+        .name-up { color: var(--text-red); text-shadow: 0 0 10px rgba(255, 51, 51, 0.3); }
+        .name-lost { color: var(--text-dim-red); opacity: 0.8; }
+
+        /* 辅助信息小字 */
+        .hist-meta { font-size: 0.75rem; color: #555; margin-top: 4px; font-weight: normal; }
+
+        /* UP 标签 - 空心红框 */
+        .tag-box-up { 
+            border: 2px solid var(--text-red); 
+            color: var(--text-red);
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-size: 1rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        /* 歪 标签 - 灰色斜体 */
+        .tag-text-lost {
+            color: #666;
+            font-size: 1.1rem;
+            font-style: italic;
+            font-weight: bold;
+            padding-right: 5px;
+            font-family: serif; /* 增加一点衬线感，更有味道 */
+        }
+
+        .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -264,9 +268,9 @@
 
     <div class="top-bar">
         <div class="resource-tag">
-            <span style="color:#bbb; font-size:0.85em">已投入合成玉</span>
+            <span style="color:#bbb; font-size:0.85em">已投入</span>
             <span class="resource-icon"></span>
-            <b id="res-spent" style="color: #fff; font-size: 1.2rem;">0</b>
+            <b id="res-spent" style="color: #fff; font-size: 1.1rem;">0</b>
         </div>
     </div>
 
@@ -276,7 +280,7 @@
         <div class="pool-tab" onclick="switchPool(2)"><span>限定寻访</span> <b>伊冯</b></div>
     </div>
 
-    <button class="history-btn" onclick="toggleHistory()">档案记录</button>
+    <div class="history-btn" onclick="toggleHistory()">档案记录</div>
 
     <div class="right-panel">
         <div class="banner-info">
@@ -292,25 +296,25 @@
                 <span>6星保底:</span>
                 <span id="txt-pity-6" class="pity-val">0 / 80</span>
             </div>
-            <div style="font-size: 0.75rem; color:#888; margin-top:5px; border-top:1px solid #444; padding-top:5px;">
-                规则: 65抽后6星概率每次+5%<br>10抽必得5星或以上
-            </div>
         </div>
         <div class="action-btns">
             <button class="btn btn-white" onclick="doPull(1)">寻访一次<span class="sub">-500</span></button>
             <button class="btn btn-yellow" onclick="doPull(10)">寻访十次<span class="sub">-5000</span></button>
         </div>
-        <div style="margin-top: 15px; opacity: 0.6; cursor: pointer; font-size: 0.8rem;" onclick="resetAll()">[ ⚠ 重置所有数据 ]</div>
+        <div style="margin-top: 10px; opacity: 0.5; font-size: 0.75rem; cursor: pointer;" onclick="resetAll()">[ 重置数据 ]</div>
     </div>
 
     <div class="overlay-layer" id="result-layer" onclick="closeResults()">
-        <div class="result-grid" id="result-grid" onclick="event.stopPropagation()"></div>
-        <div style="margin-top:40px; color:#888; border:1px solid #444; padding:8px 24px; border-radius:30px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">点击任意空白处关闭</div>
+        <div class="result-grid" id="result-grid" onclick="event.stopPropagation()">
+            </div>
+        <div id="close-hint" style="margin-top:auto; margin-bottom: 20px; align-self:center; color:#888; border:1px solid #444; padding:8px 24px; border-radius:30px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">
+            点击空白处关闭
+        </div>
     </div>
 
     <div id="history-panel">
         <div class="hist-header">
-            <span style="font-weight:bold; letter-spacing:1px; font-size: 1.1rem;">6星获取记录</span>
+            <span style="font-weight:bold; letter-spacing:1px; font-size: 1.2rem;">寻访记录</span>
             <button class="close-btn" onclick="toggleHistory()">×</button>
         </div>
         <div class="hist-list" id="hist-list-box"></div>
@@ -334,12 +338,8 @@
         { id: 'yvonne', name: '伊冯', upChar: '伊冯', off: [...BASE_PERM_6, "莱万汀", "洁尔佩塔"] }
     ];
 
-    let globalPity6 = 0;   
-    let globalPity5 = 0;   
-    let totalSpent = 0;    
-    let totalPullCount = 0;
-    let historyLogs = [];      
-    let currentPoolIndex = 0;  
+    let globalPity6 = 0; let globalPity5 = 0; let totalSpent = 0; let totalPullCount = 0;
+    let historyLogs = []; let currentPoolIndex = 0;
     let poolSparkStates = { 0: {s:0, got:false}, 1: {s:0, got:false}, 2: {s:0, got:false} };
 
     function init() { switchPool(0); updateUI(); renderHistory(); }
@@ -358,7 +358,6 @@
     function updateUI() {
         document.getElementById('res-spent').innerText = totalSpent.toLocaleString();
         document.getElementById('txt-pity-6').innerText = `${globalPity6} / 80`;
-
         const state = poolSparkStates[currentPoolIndex];
         const sparkText = document.getElementById('txt-spark');
         if (state.got) {
@@ -377,15 +376,11 @@
     }
 
     function calcOnePull() {
-        totalPullCount++;
-        globalPity6++;
-        globalPity5++;
-        
+        totalPullCount++; globalPity6++; globalPity5++;
         let sparkState = poolSparkStates[currentPoolIndex];
         if(!sparkState.got) sparkState.s++;
 
         let rank = 4; let name = "常规4星"; let isUp = false;
-
         let rate6 = 0.008; 
         if (globalPity6 >= 66) rate6 += (globalPity6 - 65) * 0.05;
         if (globalPity6 >= 80) rate6 = 1.0;
@@ -395,14 +390,12 @@
         if (isSpark || Math.random() < rate6) {
             rank = 6; globalPity6 = 0; globalPity5 = 0; 
             const pool = POOLS[currentPoolIndex];
-            
             if (isSpark || Math.random() < 0.5) {
                 name = pool.upChar; isUp = true; sparkState.got = true; sparkState.s = 0;
             } else {
                 let offList = pool.off; name = offList[Math.floor(Math.random() * offList.length)];
             }
             addHistory(name, isUp, totalPullCount, pool.name);
-
         } else {
             let rate5 = 0.08; let isPity5 = (globalPity5 >= 10); 
             if (isPity5 || Math.random() < rate5) {
@@ -415,41 +408,30 @@
     }
 
     function addHistory(charName, isUp, totalCount, poolName) {
-        historyLogs.unshift({
-            name: charName, isUp: isUp, pool: poolName, total: totalCount,
-            time: new Date().toLocaleTimeString()
-        });
+        historyLogs.unshift({ name: charName, isUp: isUp, pool: poolName, total: totalCount });
         renderHistory();
     }
 
     function renderHistory() {
         const list = document.getElementById('hist-list-box');
-        if (historyLogs.length === 0) {
-            list.innerHTML = `<div style="padding:40px; color:#555; text-align:center;">暂无6星记录</div>`;
-            return;
-        }
+        if (historyLogs.length === 0) { list.innerHTML = `<div style="padding:40px; color:#333; text-align:center;">// NO DATA //</div>`; return; }
         let html = '';
         historyLogs.forEach(log => {
-            // 优化：标签改为圆角样式
-            let tag = log.isUp 
-                ? `<span class="tag-up-badge">UP</span>` 
-                : `<span class="tag-lost-badge">歪</span>`;
+            // 样式逻辑：UP用红框，歪用文字
+            let tagHTML = log.isUp 
+                ? `<div class="tag-box-up">UP</div>` 
+                : `<div class="tag-text-lost">歪</div>`;
             
-            // 优化：名字颜色逻辑 (UP红，歪灰白)
             let nameClass = log.isUp ? 'name-up' : 'name-lost';
 
             html += `
                 <div class="hist-item">
-                    <div class="hist-row-1">
-                        <span class="${nameClass}">${log.name}</span>
-                        ${tag}
+                    <div class="hist-info">
+                        <span class="hist-name ${nameClass}">${log.name}</span>
+                        <span class="hist-meta">#${log.total} in ${log.pool}</span>
                     </div>
-                    <div class="hist-row-2">
-                        <span>卡池: ${log.pool}</span>
-                        <span>第 ${log.total} 抽</span>
-                    </div>
-                </div>
-            `;
+                    ${tagHTML}
+                </div>`;
         });
         list.innerHTML = html;
     }
@@ -460,17 +442,13 @@
         const overlay = document.getElementById('result-layer');
         const grid = document.getElementById('result-grid');
         grid.innerHTML = ''; 
+        overlay.scrollTop = 0;
 
         list.forEach((res, idx) => {
             const scene = document.createElement('div');
             scene.className = `card-scene r${res.rank}`;
             scene.style.animationDelay = `${idx * 0.1}s`;
-
-            let bgStyle = '';
-            if (CHAR_IMAGES[res.name]) {
-                bgStyle = `background-image: url('${CHAR_IMAGES[res.name]}')`;
-            }
-
+            let bgStyle = CHAR_IMAGES[res.name] ? `background-image: url('${CHAR_IMAGES[res.name]}')` : '';
             let upTag = res.isUp ? '<div class="tag-up">UP</div>' : '';
 
             scene.innerHTML = `
@@ -483,27 +461,19 @@
                             <span class="card-name">${res.name}</span>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             grid.appendChild(scene);
-
-            setTimeout(() => {
-                const cardObj = document.getElementById(`card-${idx}`);
-                if(cardObj) cardObj.classList.add('flipped');
-            }, 600 + (idx * 150)); 
+            setTimeout(() => { document.getElementById(`card-${idx}`)?.classList.add('flipped'); }, 600 + (idx * 150)); 
         });
-
         overlay.classList.add('active');
     }
 
     function closeResults() { document.getElementById('result-layer').classList.remove('active'); }
 
     function resetAll() {
-        if(!confirm("确定要重置所有记录吗？")) return;
-        globalPity6 = 0; globalPity5 = 0; 
-        totalSpent = 0; totalPullCount = 0;
-        historyLogs = [];
-        poolSparkStates = { 0: {s:0, got:false}, 1: {s:0, got:false}, 2: {s:0, got:false} };
+        if(!confirm("确定重置？")) return;
+        globalPity6 = 0; globalPity5 = 0; totalSpent = 0; totalPullCount = 0;
+        historyLogs = []; poolSparkStates = { 0: {s:0, got:false}, 1: {s:0, got:false}, 2: {s:0, got:false} };
         updateUI(); renderHistory();
     }
 
@@ -511,6 +481,3 @@
 </script>
 </body>
 </html>
-
-
-
