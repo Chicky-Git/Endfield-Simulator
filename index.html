@@ -9,16 +9,16 @@
             --accent-yellow: #ffe600; 
             --ui-black: #1a1a1a;
             --ui-white: #ffffff;
-            --r6-color: #ff4400; /* 6星烈焰色 */
-            --r5-color: #ffcc00; /* 5星金黄色 */
-            --r4-color: #00ccff; /* 4星科技蓝 */
-            --text-red: #ff3333; /* 核心修改：记录专用红色 */
+            --r6-color: #ff4400; 
+            --r5-color: #ffcc00; 
+            --r4-color: #00ccff; 
+            --text-red: #ff4d4d; /*稍微调柔和一点的红*/
         }
 
         * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; /* 使用圆润的无衬线字体 */
             background-color: #000;
             color: var(--ui-white);
             height: 100vh; width: 100vw;
@@ -27,26 +27,18 @@
             position: relative;
         }
 
-        /* === 背景立绘层 (优化版：完整显示) === */
+        /* === 背景立绘层 (改回全屏铺满) === */
         #bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* 核心修改：改为高度撑满，宽度自适应，防止图片过大 */
-            background-size: auto 100%; 
+            background-size: cover; /* 回归 Cover 模式 */
             background-repeat: no-repeat;
-            background-position: center center;
-            background-color: #050505; /* 两侧留白填充深黑色 */
+            background-position: center center; 
             transition: background-image 0.4s ease; z-index: 0;
-        }
-        
-        /* 手机端保持填满，否则图片太小 */
-        @media (max-width: 768px) {
-            #bg-layer { background-size: cover; background-position: center top; }
         }
 
         #bg-layer::after {
             content: ''; position: absolute; inset: 0;
-            /* 加强两侧渐变，让留白过渡更自然 */
-            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 90%, #000 100%);
+            background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.9) 100%);
         }
 
         /* === UI 顶栏 === */
@@ -54,12 +46,13 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: flex-end; align-items: center;
             padding: 0 40px; z-index: 20;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
         .resource-tag {
-            background: rgba(0,0,0,0.7); padding: 8px 20px; border-radius: 4px;
+            background: rgba(0,0,0,0.6); padding: 8px 20px; border-radius: 30px; /* 圆角背景 */
             font-size: 0.95rem; display: flex; align-items: center; gap: 12px;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
         }
         .resource-icon { width: 14px; height: 14px; background: #ff4444; transform: rotate(45deg); display: inline-block; }
 
@@ -83,7 +76,7 @@
         .history-btn {
             position: absolute; bottom: 40px; left: 40px; z-index: 20;
             background: rgba(30,30,30,0.8); border: 1px solid #555;
-            color: #ddd; padding: 10px 20px; cursor: pointer;
+            color: #ddd; padding: 10px 24px; cursor: pointer; border-radius: 4px;
             font-size: 0.9rem; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
             transition: 0.3s;
         }
@@ -95,15 +88,16 @@
             text-align: right; z-index: 10;
             display: flex; flex-direction: column; align-items: flex-end;
         }
-        .banner-info h1 { font-size: 3rem; margin: 0; font-style: italic; line-height: 1; text-transform: uppercase; }
+        .banner-info h1 { font-size: 3rem; margin: 0; font-style: italic; line-height: 1; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .banner-info .sub-text {
             color: var(--accent-yellow); font-size: 1rem; font-weight: bold;
             background: rgba(0,0,0,0.8); display: inline-block; padding: 2px 8px; margin-top: 5px;
         }
         .pity-counter {
-            background: rgba(0,0,0,0.7); padding: 10px 20px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.7); padding: 12px 20px; margin-bottom: 20px;
             border-left: 3px solid var(--accent-yellow); text-align: left;
             font-size: 0.85rem; color: #ddd; width: 280px;
+            backdrop-filter: blur(4px);
         }
         .pity-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .pity-val { color: var(--accent-yellow); font-weight: bold; }
@@ -120,7 +114,7 @@
         .btn-yellow { background: var(--accent-yellow); color: #000; clip-path: polygon(0 0, 100% 0, 100% 50px, calc(100% - 10px) 100%, 0 100%); min-width: 180px; }
         .btn .sub { font-size: 0.7rem; font-weight: normal; opacity: 0.7; margin-top: -2px; }
 
-        /* === 抽卡结果弹窗 (3D 翻转风格) === */
+        /* === 抽卡结果弹窗 === */
         .overlay-layer {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100;
             display: none; justify-content: center; align-items: center; flex-direction: column;
@@ -151,7 +145,7 @@
         .face {
             position: absolute; inset: 0;
             backface-visibility: hidden;
-            border-radius: 4px; overflow: hidden;
+            border-radius: 8px; overflow: hidden; /* 卡片圆角 */
             display: flex; flex-direction: column;
         }
 
@@ -198,7 +192,8 @@
 
         .tag-up { 
             position: absolute; top:0; right:0; background: #ff3333; color:white; 
-            font-size:0.7rem; padding: 3px 8px; font-weight:bold; 
+            font-size:0.7rem; padding: 4px 8px; font-weight:bold; 
+            border-bottom-left-radius: 8px; /* 卡面UP标签圆角 */
             box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
         }
 
@@ -208,39 +203,59 @@
             to { transform: translateY(0) scale(1); opacity: 1; } 
         }
 
-        /* === 历史记录面板 === */
+        /* === 历史记录面板 (字体优化版) === */
         #history-panel {
             position: fixed; left: 0; top: 0; bottom: 0; width: 420px;
-            background: rgba(15, 15, 18, 0.98);
+            background: rgba(18, 18, 22, 0.98); /* 背景稍微调亮一点点，不那么死黑 */
             border-right: 1px solid #333; z-index: 150;
             transform: translateX(-100%); transition: transform 0.3s ease;
             display: flex; flex-direction: column;
             box-shadow: 10px 0 40px rgba(0,0,0,0.7);
         }
         #history-panel.open { transform: translateX(0); }
-        .hist-header { padding: 25px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #222; }
+        .hist-header { 
+            padding: 25px; border-bottom: 1px solid #2a2a2a; 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #1e1e1e; 
+        }
         .hist-list { flex: 1; overflow-y: auto; padding: 0; }
-        .hist-item { padding: 15px 25px; border-bottom: 1px solid #2a2a2a; display: flex; flex-direction: column; gap: 6px; font-family: 'Consolas', monospace; }
-        .hist-item:hover { background: rgba(255,255,255,0.05); }
         
-        .hist-row-1 { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; }
-        .hist-row-2 { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; }
+        /* 这里的字体去掉了 Consolas，改用标准字体 */
+        .hist-item { 
+            padding: 18px 25px; 
+            border-bottom: 1px solid #2a2a2a; 
+            display: flex; flex-direction: column; gap: 8px; 
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .hist-item:hover { background: rgba(255,255,255,0.03); }
         
-        /* 核心修改：标签样式 - 红色 */
+        .hist-row-1 { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.05rem; }
+        .hist-row-2 { display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; }
+        
+        /* 标签改为圆角胶囊样式，更柔和 */
         .tag-up-badge { 
             color: var(--text-red); 
-            background: rgba(255, 51, 51, 0.1); 
-            border: 1px solid var(--text-red);
-            padding: 0 6px; font-size: 0.75rem; border-radius: 2px; font-weight: bold;
+            background: rgba(255, 77, 77, 0.15); 
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            padding: 2px 8px; font-size: 0.75rem; 
+            border-radius: 12px; /* 圆角 */
+            font-weight: bold;
         }
         .tag-lost-badge { 
-            color: var(--text-red); 
-            border: 1px solid var(--text-red); 
-            padding: 0 6px; font-size: 0.75rem; border-radius: 2px; 
+            color: #aaa; 
+            border: 1px solid #555; 
+            padding: 2px 8px; font-size: 0.75rem; 
+            border-radius: 12px; /* 圆角 */
             opacity: 0.8;
         }
+        /* 歪了的时候名字颜色 */
+        .name-lost { color: #ccc; }
+        /* UP的时候名字颜色 */
+        .name-up { color: var(--text-red); }
 
-        .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;}
+        .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; opacity: 0.7;}
+        .close-btn:hover { opacity: 1;}
     </style>
 </head>
 <body>
@@ -249,7 +264,7 @@
 
     <div class="top-bar">
         <div class="resource-tag">
-            <span style="color:#aaa; font-size:0.8em">已投入合成玉</span>
+            <span style="color:#bbb; font-size:0.85em">已投入合成玉</span>
             <span class="resource-icon"></span>
             <b id="res-spent" style="color: #fff; font-size: 1.2rem;">0</b>
         </div>
@@ -261,7 +276,7 @@
         <div class="pool-tab" onclick="switchPool(2)"><span>限定寻访</span> <b>伊冯</b></div>
     </div>
 
-    <button class="history-btn" onclick="toggleHistory()"><span style="font-size:1.2em">≣</span> 档案记录</button>
+    <button class="history-btn" onclick="toggleHistory()">档案记录</button>
 
     <div class="right-panel">
         <div class="banner-info">
@@ -290,12 +305,12 @@
 
     <div class="overlay-layer" id="result-layer" onclick="closeResults()">
         <div class="result-grid" id="result-grid" onclick="event.stopPropagation()"></div>
-        <div style="margin-top:40px; color:#888; border:1px solid #444; padding:8px 24px; border-radius:20px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">点击任意空白处关闭</div>
+        <div style="margin-top:40px; color:#888; border:1px solid #444; padding:8px 24px; border-radius:30px; cursor:pointer; font-size: 0.9rem;" onclick="closeResults()">点击任意空白处关闭</div>
     </div>
 
     <div id="history-panel">
         <div class="hist-header">
-            <span style="font-weight:bold; letter-spacing:1px; font-size: 1.2rem;">6星获取记录</span>
+            <span style="font-weight:bold; letter-spacing:1px; font-size: 1.1rem;">6星获取记录</span>
             <button class="close-btn" onclick="toggleHistory()">×</button>
         </div>
         <div class="hist-list" id="hist-list-box"></div>
@@ -415,18 +430,23 @@
         }
         let html = '';
         historyLogs.forEach(log => {
-            let tag = log.isUp ? `<span class="tag-up-badge">UP</span>` : `<span class="tag-lost-badge">歪</span>`;
-            // 核心修改：名字颜色改为定义的 text-red (红色)
-            let nameColor = 'var(--text-red)'; 
+            // 优化：标签改为圆角样式
+            let tag = log.isUp 
+                ? `<span class="tag-up-badge">UP</span>` 
+                : `<span class="tag-lost-badge">歪</span>`;
+            
+            // 优化：名字颜色逻辑 (UP红，歪灰白)
+            let nameClass = log.isUp ? 'name-up' : 'name-lost';
+
             html += `
                 <div class="hist-item">
                     <div class="hist-row-1">
-                        <span style="color:${nameColor}">${log.name}</span>
-                        <span>${tag}</span>
+                        <span class="${nameClass}">${log.name}</span>
+                        ${tag}
                     </div>
                     <div class="hist-row-2">
                         <span>卡池: ${log.pool}</span>
-                        <span>总计第 ${log.total} 抽</span>
+                        <span>第 ${log.total} 抽</span>
                     </div>
                 </div>
             `;
@@ -491,4 +511,6 @@
 </script>
 </body>
 </html>
+
+
 
