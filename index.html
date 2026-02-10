@@ -12,7 +12,7 @@
             --r6-color: #ff4400; /* 6星烈焰色 */
             --r5-color: #ffcc00; /* 5星金黄色 */
             --r4-color: #00ccff; /* 4星科技蓝 */
-            --text-red: #ff3333; /* 新增：记录专用红色 */
+            --text-red: #ff3333; /* 核心修改：记录专用红色 */
         }
 
         * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
@@ -27,15 +27,26 @@
             position: relative;
         }
 
-        /* === 背景立绘层 === */
+        /* === 背景立绘层 (优化版：完整显示) === */
         #bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
+            /* 核心修改：改为高度撑满，宽度自适应，防止图片过大 */
+            background-size: auto 100%; 
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-color: #050505; /* 两侧留白填充深黑色 */
             transition: background-image 0.4s ease; z-index: 0;
         }
+        
+        /* 手机端保持填满，否则图片太小 */
+        @media (max-width: 768px) {
+            #bg-layer { background-size: cover; background-position: center top; }
+        }
+
         #bg-layer::after {
             content: ''; position: absolute; inset: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.9) 100%);
+            /* 加强两侧渐变，让留白过渡更自然 */
+            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 90%, #000 100%);
         }
 
         /* === UI 顶栏 === */
@@ -215,7 +226,7 @@
         .hist-row-1 { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; }
         .hist-row-2 { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; }
         
-        /* 修改点：标签文字颜色改为红色 */
+        /* 核心修改：标签样式 - 红色 */
         .tag-up-badge { 
             color: var(--text-red); 
             background: rgba(255, 51, 51, 0.1); 
@@ -224,8 +235,9 @@
         }
         .tag-lost-badge { 
             color: var(--text-red); 
-            border: 1px solid #555; 
+            border: 1px solid var(--text-red); 
             padding: 0 6px; font-size: 0.75rem; border-radius: 2px; 
+            opacity: 0.8;
         }
 
         .close-btn { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;}
@@ -404,7 +416,7 @@
         let html = '';
         historyLogs.forEach(log => {
             let tag = log.isUp ? `<span class="tag-up-badge">UP</span>` : `<span class="tag-lost-badge">歪</span>`;
-            // 修改点：干员名字颜色改为红色
+            // 核心修改：名字颜色改为定义的 text-red (红色)
             let nameColor = 'var(--text-red)'; 
             html += `
                 <div class="hist-item">
@@ -479,3 +491,4 @@
 </script>
 </body>
 </html>
+
