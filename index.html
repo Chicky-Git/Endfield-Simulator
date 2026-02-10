@@ -41,26 +41,31 @@
             background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.9) 100%);
         }
 
-        /* === UI 顶栏 (更新图标样式) === */
+        /* === UI 顶栏 (修复图标) === */
         .top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             display: flex; justify-content: flex-end; align-items: center;
             padding: 0 20px; z-index: 20;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
+        
         .resource-tag {
-            background: rgba(0,0,0,0.6); padding: 4px 16px; border-radius: 30px;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 8px; /* 调整间距 */
-            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.6); 
+            padding: 6px 16px 6px 12px; 
+            border-radius: 30px;
+            font-size: 0.9rem; 
+            display: flex; 
+            align-items: center; /* 垂直居中核心 */
+            gap: 8px; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         
-        /* === 新的图标样式 === */
-        .resource-icon { 
-            width: 28px; height: 28px; 
-            object-fit: contain; 
-            display: inline-block;
-            vertical-align: middle;
-            margin-top: -2px; /* 微调垂直对齐 */
+        /* 直接用代码画的图标，不再依赖外部图片 */
+        .svg-icon {
+            width: 24px; height: 24px;
+            filter: drop-shadow(0 0 2px rgba(255, 50, 50, 0.8)); /* 红色发光特效 */
         }
 
         /* === 左侧卡池选择 === */
@@ -192,7 +197,7 @@
             border-bottom-left-radius: 8px; box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
         }
 
-        /* === 手机端适配 (一页全览核心) === */
+        /* === 手机端适配 === */
         @media (max-width: 768px) {
             .left-sidebar { top: 40%; transform: translateY(-40%); }
             .right-panel { bottom: 20px; right: 20px; }
@@ -264,9 +269,15 @@
 
     <div class="top-bar">
         <div class="resource-tag">
-            <span style="color:#bbb; font-size:0.85em">已投入</span>
-            <img src="images/res_icon.png" class="resource-icon" alt="RES">
-            <b id="res-spent" style="color: #fff; font-size: 1.1rem;">0</b>
+            <span style="color:#bbb; font-size:0.85em; margin-right:2px;">已投入</span>
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 L93 28 V72 L50 95 L7 72 V28 Z" 
+                      stroke="#ff4444" stroke-width="8" fill="rgba(255,0,0,0.15)" stroke-linejoin="round"/>
+                <path d="M50 25 L75 70 H25 Z" fill="#ffffff" />
+                <path d="M15 35 L5 30" stroke="#ff4444" stroke-width="4" stroke-linecap="round"/>
+                <path d="M85 35 L95 30" stroke="#ff4444" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <b id="res-spent" style="color: #fff; font-size: 1.1rem; font-family: monospace;">0</b>
         </div>
     </div>
 
