@@ -41,7 +41,7 @@
             background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.9) 100%);
         }
 
-        /* === UI 顶栏 === */
+        /* === UI 顶栏 (更新图标样式) === */
         .top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             display: flex; justify-content: flex-end; align-items: center;
@@ -49,11 +49,19 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
         .resource-tag {
-            background: rgba(0,0,0,0.6); padding: 6px 16px; border-radius: 30px;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+            background: rgba(0,0,0,0.6); padding: 4px 16px; border-radius: 30px;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 8px; /* 调整间距 */
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
         }
-        .resource-icon { width: 12px; height: 12px; background: #ff4444; transform: rotate(45deg); display: inline-block; }
+        
+        /* === 新的图标样式 === */
+        .resource-icon { 
+            width: 28px; height: 28px; 
+            object-fit: contain; 
+            display: inline-block;
+            vertical-align: middle;
+            margin-top: -2px; /* 微调垂直对齐 */
+        }
 
         /* === 左侧卡池选择 === */
         .left-sidebar {
@@ -119,9 +127,9 @@
             position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100;
             display: none; 
             flex-direction: column; 
-            justify-content: center; /* 垂直居中 */
+            justify-content: center;
             align-items: center;
-            overflow: hidden; /* 禁止页面滚动 */
+            overflow: hidden; 
         }
         .overlay-layer.active { display: flex; animation: fadeIn 0.3s; }
         
@@ -136,7 +144,7 @@
         }
 
         .card-scene {
-            aspect-ratio: 3/4.5; /* 电脑端保持固定比例 */
+            aspect-ratio: 3/4.5;
             position: relative;
             opacity: 0;
             animation: cardEnter 0.5s forwards;
@@ -191,35 +199,20 @@
             .btn { height: 45px; font-size: 0.9rem; min-width: 100px; }
             .btn-yellow { min-width: 130px; }
             
-            /* 弹窗容器 */
             .overlay-layer { padding: 10px; }
 
-            /* 核心：手机端网格调整 */
             .result-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2列 */
-                grid-template-rows: repeat(5, 1fr);    /* 5行 */
-                height: 75vh;                          /* 强制高度为屏幕的75% */
-                width: 95%;                            /* 宽度占满 */
-                gap: 8px;                              /* 减小间距 */
-                margin-bottom: 10px;
+                grid-template-columns: repeat(2, 1fr); 
+                grid-template-rows: repeat(5, 1fr);
+                height: 75vh; width: 95%; gap: 8px; margin-bottom: 10px;
             }
 
-            .card-scene {
-                aspect-ratio: unset; /* 取消固定比例，由 Grid 自动拉伸 */
-                height: 100%;        /* 填满格子 */
-                width: 100%;
-            }
-
+            .card-scene { aspect-ratio: unset; height: 100%; width: 100%; }
             .card-info { padding: 4px; }
-            .card-name { font-size: 0.8rem; } /* 缩小字体 */
+            .card-name { font-size: 0.8rem; }
             .card-star { font-size: 0.8rem; margin-bottom: 0; }
             
-            #close-hint {
-                position: relative; /* 不再固定底部，而是跟随网格 */
-                margin-top: 10px;
-                font-size: 0.8rem;
-                padding: 6px 20px;
-            }
+            #close-hint { position: relative; margin-top: 10px; font-size: 0.8rem; padding: 6px 20px; }
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -272,7 +265,7 @@
     <div class="top-bar">
         <div class="resource-tag">
             <span style="color:#bbb; font-size:0.85em">已投入</span>
-            <span class="resource-icon"></span>
+            <img src="images/res_icon.png" class="resource-icon" alt="RES">
             <b id="res-spent" style="color: #fff; font-size: 1.1rem;">0</b>
         </div>
     </div>
@@ -443,11 +436,10 @@
         const grid = document.getElementById('result-grid');
         grid.innerHTML = ''; 
         
-        // 渲染卡片
         list.forEach((res, idx) => {
             const scene = document.createElement('div');
             scene.className = `card-scene r${res.rank}`;
-            scene.style.animationDelay = `${idx * 0.05}s`; // 加快动画速度
+            scene.style.animationDelay = `${idx * 0.05}s`;
             let bgStyle = CHAR_IMAGES[res.name] ? `background-image: url('${CHAR_IMAGES[res.name]}')` : '';
             let upTag = res.isUp ? '<div class="tag-up">UP</div>' : '';
 
